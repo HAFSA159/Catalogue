@@ -48,11 +48,11 @@ public class UserService {
             UserResponseDTO userResponseDto = new UserResponseDTO();
             userResponseDto.setId(user.getId());
             userResponseDto.setLogin(user.getLogin());
-            userResponseDto.setRoles(
-                    user.getRoles().stream()
-                            .map(role -> role.getName())
-                            .collect(Collectors.toList())
-            );
+//            userResponseDto.setRoles(
+//                    user.getRoles().stream()
+//                            .map(role -> role.getName())
+//                            .collect(Collectors.toList())
+//            );
 
             return userResponseDto;
         } catch (Exception e) {
