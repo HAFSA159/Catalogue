@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/produitdb
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: root
+
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
