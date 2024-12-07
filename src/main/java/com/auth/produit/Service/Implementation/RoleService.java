@@ -7,19 +7,16 @@ import com.auth.produit.Exception.RoleNotFoundException;
 import com.auth.produit.Mapper.RoleMapper;
 import com.auth.produit.Repository.RoleRepository;
 import com.auth.produit.Service.Interface.IRoleService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RoleService implements IRoleService {
     private final RoleRepository roleRepository;
     private final RoleMapper roleMapper;
-
-    public RoleService(RoleRepository roleRepository, RoleMapper roleMapper) {
-        this.roleRepository = roleRepository;
-        this.roleMapper = roleMapper;
-    }
 
     @Override
     public List<RoleResponseDTO> getAllRoles() {

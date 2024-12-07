@@ -3,8 +3,7 @@ package com.auth.produit.Mapper;
 import com.auth.produit.DTO.ReponceDTO.ProduitResponseDTO;
 import com.auth.produit.DTO.RequesteDTO.ProduitRequestDTO;
 import com.auth.produit.Entity.Produit;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface ProduitMapper {

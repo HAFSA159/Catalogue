@@ -11,24 +11,19 @@ import com.auth.produit.Repository.CategorieRepository;
 import com.auth.produit.Repository.ProduitRepository;
 
 import com.auth.produit.Service.Interface.IProduitService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProduitService implements IProduitService {
     private final ProduitRepository produitRepository;
     private final CategorieRepository categorieRepository;
     private final ProduitMapper produitMapper;
 
-    public ProduitService(ProduitRepository produitRepository,
-                          CategorieRepository categorieRepository,
-                          ProduitMapper produitMapper) {
-        this.produitRepository = produitRepository;
-        this.categorieRepository = categorieRepository;
-        this.produitMapper = produitMapper;
-    }
 
     @Override
     public List<ProduitResponseDTO> getAllProduits() {

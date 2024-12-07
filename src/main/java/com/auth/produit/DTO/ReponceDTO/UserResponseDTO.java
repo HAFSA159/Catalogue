@@ -11,6 +11,6 @@ public class UserResponseDTO {
     private Long id;
     private String login;
     private Boolean active;
-    // private Collection<String> roles;
+    private Collection<String> roles;
 
 }
