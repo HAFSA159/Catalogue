@@ -12,6 +12,8 @@ import com.auth.produit.Repository.ProduitRepository;
 
 import com.auth.produit.Service.Interface.IProduitService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +34,13 @@ public class ProduitService implements IProduitService {
                 .map(produitMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
+
+    public Page<ProduitResponseDTO> searchProduits(String designation, Long categorieId, Pageable pageable) {
+        return produitRepository.findByDesignationAndCategorie(designation, categorieId, pageable)
+                .map(produitMapper::toResponseDTO);
+    }
+
+
 
     @Override
     public ProduitResponseDTO getProduitById(Long id) {

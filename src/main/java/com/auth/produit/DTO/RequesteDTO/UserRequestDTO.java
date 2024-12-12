@@ -1,5 +1,6 @@
 package com.auth.produit.DTO.RequesteDTO;
 
+import com.auth.produit.Entity.Roles;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -19,6 +20,6 @@ public class UserRequestDTO {
 
     private Boolean active;
 
-    @NotNull(message = "Les rôles sont obligatoires")
-    private Set<Long> rolesIds;
+    @NotNull(message = "Le rôle est obligatoiresssss")
+    private Roles role;
 }

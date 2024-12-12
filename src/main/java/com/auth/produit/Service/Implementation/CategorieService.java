@@ -7,20 +7,33 @@ import com.auth.produit.Exception.CategorieNotFoundException;
 import com.auth.produit.Mapper.CategorieMapper;
 import com.auth.produit.Repository.CategorieRepository;
 import com.auth.produit.Service.Interface.ICategorieService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CategorieService implements ICategorieService {
     private final CategorieRepository categorieRepository;
     private final CategorieMapper categorieMapper;
 
-    public CategorieService(CategorieRepository categorieRepository, CategorieMapper categorieMapper) {
-        this.categorieRepository = categorieRepository;
-        this.categorieMapper = categorieMapper;
+
+    @Override
+    public CategorieResponseDTO createCategorie(CategorieRequestDTO requestDTO) {
+        Categorie categorie = categorieMapper.toEntity(requestDTO);
+        Categorie savedCategorie = categorieRepository.save(categorie);
+        return categorieMapper.toResponseDTOForCreation(savedCategorie);
     }
+
+    @Override
+    public CategorieResponseDTO getCategorieByName(String name) {
+        Categorie categorie = categorieRepository.findByNom(name)
+                .orElseThrow(() -> new CategorieNotFoundException("Catégorie avec le nom " + name + " n'existe pas."));
+        return categorieMapper.toResponseDTO(categorie);
+    }
+
 
     @Override
     public List<CategorieResponseDTO> getAllCategories() {
@@ -30,6 +43,7 @@ public class CategorieService implements ICategorieService {
                 .collect(Collectors.toList());
     }
 
+
     @Override
     public CategorieResponseDTO getCategorieById(Long id) {
         Categorie categorie = categorieRepository.findById(id)
@@ -37,12 +51,6 @@ public class CategorieService implements ICategorieService {
         return categorieMapper.toResponseDTO(categorie);
     }
 
-    @Override
-    public CategorieResponseDTO createCategorie(CategorieRequestDTO requestDTO) {
-        Categorie categorie = categorieMapper.toEntity(requestDTO);
-        Categorie savedCategorie = categorieRepository.save(categorie);
-        return categorieMapper.toResponseDTO(savedCategorie);
-    }
 
     @Override
     public CategorieResponseDTO updateCategorie(Long id, CategorieRequestDTO requestDTO) {

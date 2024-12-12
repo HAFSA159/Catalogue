@@ -3,13 +3,16 @@ package com.auth.produit.Service.Implementation;
 import com.auth.produit.DTO.ReponceDTO.UserResponseDTO;
 import com.auth.produit.DTO.RequesteDTO.UserRequestDTO;
 import com.auth.produit.Entity.Role;
+import com.auth.produit.Entity.Roles;
 import com.auth.produit.Entity.User;
 import com.auth.produit.Mapper.UserMapper;
 import com.auth.produit.Repository.RoleRepository;
 import com.auth.produit.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -29,41 +33,62 @@ public class UserService {
 
 
     public User createUser(UserRequestDTO user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         User userEntity = userMapper.toEntity(user);
-        Role defaultRole = roleRepository.findByName("USER")
-                .orElseThrow(() -> new RuntimeException("Default role not found"));
-        userEntity.setRoles(Collections.singletonList(defaultRole));
+        userEntity.setRole(Roles.USER);
 
         return userRepository.save(userEntity);
     }
 
+    public User updateRoleToAdmin(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable avec l'ID : " + userId));
+
+        user.setRole(Roles.ADMIN);
+
+
+        return userRepository.save(user);
+    }
+
 
     public UserResponseDTO login(UserRequestDTO userRequestDto) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            userRequestDto.getLogin(),
-                            userRequestDto.getPassword()
-                    )
-            );
 
-            User user = userRepository.findByLogin(userRequestDto.getLogin())
-                    .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable avec le login : " + userRequestDto.getLogin()));
 
-            UserResponseDTO userResponseDto = new UserResponseDTO();
-            userResponseDto.setId(user.getId());
-            userResponseDto.setLogin(user.getLogin());
-            userResponseDto.setRoles(
-                    user.getRoles().stream()
-                            .map(Role::getName)
-                            .collect(Collectors.toList())
-            );
+        Optional<User> user = userRepository.findByLogin(userRequestDto.getLogin());
 
-            return userResponseDto;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Échec de la connexion : Identifiants incorrects");
+
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("Utilisateur introuvable avec le login : " + userRequestDto.getLogin());
         }
+
+        User authenticatedUser = user.get();
+
+
+        log.info("user: {}", authenticatedUser, new BCryptPasswordEncoder().matches(userRequestDto.getPassword(),user.get().getPassword()));
+
+        if(new BCryptPasswordEncoder().matches(userRequestDto.getPassword(),user.get().getPassword())) {
+            try {
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                userRequestDto.getLogin(),
+                                userRequestDto.getPassword()
+                        )
+                );
+
+                UserResponseDTO userResponseDto = new UserResponseDTO();
+                userResponseDto.setId(authenticatedUser.getId());
+                userResponseDto.setLogin(authenticatedUser.getLogin());
+                userResponseDto.setRoles(Collections.singleton(authenticatedUser.getRole().toString()));
+
+                return userResponseDto;
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Échec de la connexion : Identifiants incorrects");
+            }
+        }
+
+        throw new IllegalArgumentException("Password d'utilisateur est incorrect");
+
+
     }
 
 
@@ -82,7 +107,7 @@ public class UserService {
                     existingUser.setLogin(updatedUser.getLogin());
                     existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
                     existingUser.setActive(updatedUser.getActive());
-                    existingUser.setRoles(updatedUser.getRoles());
+                    existingUser.setRole(updatedUser.getRole());
                     return userRepository.save(existingUser);
                 })
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable avec l'ID : " + userId));
